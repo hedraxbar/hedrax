@@ -1,0 +1,1 @@
+export { FeaturedProjectsSection } from "./FeaturedProjectsSection";

@@ -1,0 +1,26 @@
+{
+  "name": "hederax-contracts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.1.0",
+    "@nomicfoundation/hardhat-verify": "^3.0.3",
+    "@types/node": "^24.7.2",
+    "dotenv": "^17.2.3",
+    "hardhat": "^2.26.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@limitbreak/creator-token-standards": "^5.0.0",
+    "@openzeppelin/contracts": "^4.9.6",
+    "node-fetch": "^3.3.2"
+  }
+}
