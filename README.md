@@ -17,6 +17,9 @@ https://www.youtube.com/watch?v=Myw0BuIke2w
 link to the pitch deck
 https://drive.google.com/file/d/1LZ7tQ5Ft1065jAkLDqYeAMg9AUEQNkDI/view?usp=drive_link
 
+Product Pitch & Q&A with Judges:- https://youtu.be/AO1YUCzbti8
+Hedera Onboarding & Reward Activity:- https://youtu.be/oEwoL3UYU3c
+
 2. Core Functional Modules
 2.1 Marketplace Engine
 • Features: Minting, fixed-price listings, bidding, royalties, and transfers.
