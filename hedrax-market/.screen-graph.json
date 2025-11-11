@@ -55,15 +55,15 @@
   ],
   "edges": [
     {
-      "id": "src\\screens\\LandingPage\\sections\\NavigationSection\\NavigationSection.tsx:68:6-to-src\\screens\\LandingPage\\LandingPage.tsx",
+      "id": "src\\screens\\LandingPage\\sections\\NavigationSection\\NavigationSection.tsx:186:6-to-src\\screens\\LandingPage\\LandingPage.tsx",
       "source": "src\\screens\\LandingPage\\LandingPage.tsx",
       "target": "src\\screens\\LandingPage\\LandingPage.tsx",
       "data": {
         "viaRoute": "/",
         "trigger": {
           "element": "<NavLink to=\"/\" className=\"shrink-0\" aria-label=\"Go home\">\r\n        <img\r\n          className=\"w-[90px] h-[22px] object-cover\"\r\n          alt=\"Hedrax logo\"\r\n          src=\"https://c.animaapp.com/mh588waf3IvYis/img/hedraxlogo-2-1.png\"\r\n        />\r\n      </NavLink>",
-          "line": 68,
-          "endLine": 74,
+          "line": 186,
+          "endLine": 192,
           "column": 6,
           "endColumn": 16,
           "sourceFile": "src\\screens\\LandingPage\\sections\\NavigationSection\\NavigationSection.tsx"
@@ -135,15 +135,15 @@
       }
     },
     {
-      "id": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx:77:6-to-src\\screens\\LandingPage\\LandingPage.tsx",
+      "id": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx:186:6-to-src\\screens\\LandingPage\\LandingPage.tsx",
       "source": "src\\screens\\Launchpad\\Launchpad.tsx",
       "target": "src\\screens\\LandingPage\\LandingPage.tsx",
       "data": {
         "viaRoute": "/",
         "trigger": {
           "element": "<NavLink to=\"/\" className=\"shrink-0\" aria-label=\"Go home\">\r\n        <img\r\n          className=\"w-[90px] h-[22px] object-cover\"\r\n          alt=\"Hedrax logo\"\r\n          src=\"https://c.animaapp.com/mh588waf3IvYis/img/hedraxlogo-2-1.png\"\r\n        />\r\n      </NavLink>",
-          "line": 77,
-          "endLine": 83,
+          "line": 186,
+          "endLine": 192,
           "column": 6,
           "endColumn": 16,
           "sourceFile": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx"
@@ -199,15 +199,15 @@
       }
     },
     {
-      "id": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx:77:6-to-src\\screens\\LandingPage\\LandingPage.tsx",
+      "id": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx:186:6-to-src\\screens\\LandingPage\\LandingPage.tsx",
       "source": "src\\screens\\Launchpad\\Launchpad.tsx",
       "target": "src\\screens\\LandingPage\\LandingPage.tsx",
       "data": {
         "viaRoute": "/",
         "trigger": {
           "element": "<NavLink to=\"/\" className=\"shrink-0\" aria-label=\"Go home\">\r\n        <img\r\n          className=\"w-[90px] h-[22px] object-cover\"\r\n          alt=\"Hedrax logo\"\r\n          src=\"https://c.animaapp.com/mh588waf3IvYis/img/hedraxlogo-2-1.png\"\r\n        />\r\n      </NavLink>",
-          "line": 77,
-          "endLine": 83,
+          "line": 186,
+          "endLine": 192,
           "column": 6,
           "endColumn": 16,
           "sourceFile": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx"
@@ -215,15 +215,15 @@
       }
     },
     {
-      "id": "src\\screens\\Launchpad\\SelfCreate.tsx:297:18-to-src\\screens\\MarketplacePage\\MarketplacePage.tsx",
+      "id": "src\\screens\\Launchpad\\SelfCreate.tsx:304:18-to-src\\screens\\MarketplacePage\\MarketplacePage.tsx",
       "source": "src\\screens\\Launchpad\\SelfCreate.tsx",
       "target": "src\\screens\\MarketplacePage\\MarketplacePage.tsx",
       "data": {
         "viaRoute": "/marketplace",
         "trigger": {
           "element": "<Link\r\n                    to=\"/marketplace\"\r\n                    className=\"inline-flex items-center gap-2 rounded-xl bg-[#d5d7e3] px-4 py-2 text-sm font-medium text-[#0d0d0d] hover:bg-[#c5c7d3]\"\r\n                  >\r\n                    Go to Marketplace\r\n                  </Link>",
-          "line": 297,
-          "endLine": 302,
+          "line": 304,
+          "endLine": 309,
           "column": 18,
           "endColumn": 25,
           "sourceFile": "src\\screens\\Launchpad\\SelfCreate.tsx"
@@ -231,15 +231,15 @@
       }
     },
     {
-      "id": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx:77:6-to-src\\screens\\LandingPage\\LandingPage.tsx",
+      "id": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx:186:6-to-src\\screens\\LandingPage\\LandingPage.tsx",
       "source": "src\\screens\\Launchpad\\Launchpad.tsx",
       "target": "src\\screens\\LandingPage\\LandingPage.tsx",
       "data": {
         "viaRoute": "/",
         "trigger": {
           "element": "<NavLink to=\"/\" className=\"shrink-0\" aria-label=\"Go home\">\r\n        <img\r\n          className=\"w-[90px] h-[22px] object-cover\"\r\n          alt=\"Hedrax logo\"\r\n          src=\"https://c.animaapp.com/mh588waf3IvYis/img/hedraxlogo-2-1.png\"\r\n        />\r\n      </NavLink>",
-          "line": 77,
-          "endLine": 83,
+          "line": 186,
+          "endLine": 192,
           "column": 6,
           "endColumn": 16,
           "sourceFile": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx"
@@ -247,15 +247,15 @@
       }
     },
     {
-      "id": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx:77:6-to-src\\screens\\LandingPage\\LandingPage.tsx",
+      "id": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx:186:6-to-src\\screens\\LandingPage\\LandingPage.tsx",
       "source": "src\\screens\\Launchpad\\Launchpad.tsx",
       "target": "src\\screens\\LandingPage\\LandingPage.tsx",
       "data": {
         "viaRoute": "/",
         "trigger": {
           "element": "<NavLink to=\"/\" className=\"shrink-0\" aria-label=\"Go home\">\r\n        <img\r\n          className=\"w-[90px] h-[22px] object-cover\"\r\n          alt=\"Hedrax logo\"\r\n          src=\"https://c.animaapp.com/mh588waf3IvYis/img/hedraxlogo-2-1.png\"\r\n        />\r\n      </NavLink>",
-          "line": 77,
-          "endLine": 83,
+          "line": 186,
+          "endLine": 192,
           "column": 6,
           "endColumn": 16,
           "sourceFile": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx"
@@ -279,15 +279,15 @@
       }
     },
     {
-      "id": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx:77:6-to-src\\screens\\LandingPage\\LandingPage.tsx",
+      "id": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx:186:6-to-src\\screens\\LandingPage\\LandingPage.tsx",
       "source": "src\\screens\\Launchpad\\Launchpad.tsx",
       "target": "src\\screens\\LandingPage\\LandingPage.tsx",
       "data": {
         "viaRoute": "/",
         "trigger": {
           "element": "<NavLink to=\"/\" className=\"shrink-0\" aria-label=\"Go home\">\r\n        <img\r\n          className=\"w-[90px] h-[22px] object-cover\"\r\n          alt=\"Hedrax logo\"\r\n          src=\"https://c.animaapp.com/mh588waf3IvYis/img/hedraxlogo-2-1.png\"\r\n        />\r\n      </NavLink>",
-          "line": 77,
-          "endLine": 83,
+          "line": 186,
+          "endLine": 192,
           "column": 6,
           "endColumn": 16,
           "sourceFile": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx"
@@ -295,15 +295,15 @@
       }
     },
     {
-      "id": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx:77:6-to-src\\screens\\LandingPage\\LandingPage.tsx",
+      "id": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx:186:6-to-src\\screens\\LandingPage\\LandingPage.tsx",
       "source": "src\\screens\\Launchpad\\Launchpad.tsx",
       "target": "src\\screens\\LandingPage\\LandingPage.tsx",
       "data": {
         "viaRoute": "/",
         "trigger": {
           "element": "<NavLink to=\"/\" className=\"shrink-0\" aria-label=\"Go home\">\r\n        <img\r\n          className=\"w-[90px] h-[22px] object-cover\"\r\n          alt=\"Hedrax logo\"\r\n          src=\"https://c.animaapp.com/mh588waf3IvYis/img/hedraxlogo-2-1.png\"\r\n        />\r\n      </NavLink>",
-          "line": 77,
-          "endLine": 83,
+          "line": 186,
+          "endLine": 192,
           "column": 6,
           "endColumn": 16,
           "sourceFile": "src\\screens\\Launchpad\\sections\\NavigationBarSection\\NavigationBarSection.tsx"

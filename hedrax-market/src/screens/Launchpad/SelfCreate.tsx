@@ -1,29 +1,27 @@
-// src/screens/Launchpad/SelfCreate.tsx
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ChevronLeft,
   Sparkles,
-  ShieldCheck,
   CheckCircle2,
   Link as LinkIcon,
   Image as ImageIcon,
   Loader2,
+  Copy,
 } from 'lucide-react';
 import { ethers } from 'ethers';
 
-import { NavigationSection, HeaderSpacer } from './sections/NavigationBarSection/NavigationBarSection';
-import { FooterSection } from './sections/FooterSection';
+// UPDATED: import from the NavigationSection you shared
+import { NavigationSection, HeaderSpacer } from '../LandingPage/sections/NavigationSection/NavigationSection';
+import { FooterSection } from '../LandingPage/sections/FooterSection';
 import { Button } from '../../components/ui/button';
-import { useHederaWallet } from '../../hedera/useHederaWallet';
-import { getWcEvmProvider, getWcAddress } from '../../hedera/wcEvmProvider';
+import { useWallet } from '../../hedera/useWallet';
 
-/* ----------------------- Config ----------------------- */
 const FACTORY_ADDRESS =
   (import.meta.env.VITE_FACTORY_CONTRACT_ADDRESS as string) ||
   '0xba8f26A3D29934476A9752BC7c6d3D936FDD32d8';
 
-const TARGET_CHAIN_ID = 295; // Hedera EVM Mainnet
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
 
 const FACTORY_ABI = [
   {
@@ -67,29 +65,13 @@ const iface = new ethers.Interface(FACTORY_ABI);
 const inputBase =
   'w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-white/40';
 
-function getInjectedProvider(): any | null {
-  const w = window as any;
-  return w.ethereum || w.hashpack?.ethereum || w.hedera?.ethereum || null;
-}
-
-async function ensureInjectedOnHedera(eth: any) {
-  const hex = await eth.request({ method: 'eth_chainId' }).catch(() => null);
-  const id = typeof hex === 'string' ? Number(hex) : NaN;
-  if (id === TARGET_CHAIN_ID) return;
-  await eth.request({
-    method: 'wallet_switchEthereumChain',
-    params: [{ chainId: '0x' + TARGET_CHAIN_ID.toString(16) }],
-  });
-}
-
-/* --------------------------- Page --------------------------- */
 export default function SelfCreate(): JSX.Element {
   const navigate = useNavigate();
+  const { status, account, displayUri, connect, getEthers, login, token } = useWallet();
 
-  const { status: hederaStatus, accountId: hederaAccountId } = (useHederaWallet() as any) || {};
-  const hederaConnected = !!hederaAccountId;
+  const [wcOpen, setWcOpen] = useState(false);
+  useEffect(() => setWcOpen(!!displayUri), [displayUri]);
 
-  // Form
   const [form, setForm] = useState({
     name: '',
     symbol: '',
@@ -105,39 +87,20 @@ export default function SelfCreate(): JSX.Element {
     projectOwner: '',
   });
 
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string>('');
-  const [successAddr, setSuccessAddr] = useState<string>('');
-
-  // Prefill addresses from injected provider if present (non-blocking)
   useEffect(() => {
-    (async () => {
-      try {
-        const eth = getInjectedProvider();
-        if (!eth) return;
-        await ensureInjectedOnHedera(eth).catch(() => {});
-        const browser = new ethers.BrowserProvider(eth);
-        const signer = await browser.getSigner().catch(() => null);
-        const addr = await signer?.getAddress().catch(() => null);
-        if (addr) {
-          setForm((p) => ({
-            ...p,
-            royaltyReceiver: p.royaltyReceiver || addr,
-            mintFeeReceiver: p.mintFeeReceiver || addr,
-            signer: p.signer || addr,
-            projectOwner: p.projectOwner || addr,
-          }));
-        }
-      } catch {}
-    })();
-  }, []);
+    if (account) {
+      setForm((p) => ({
+        ...p,
+        projectOwner: p.projectOwner || account,
+        signer: p.signer || account,
+        royaltyReceiver: p.royaltyReceiver || account,
+        mintFeeReceiver: p.mintFeeReceiver || account,
+      }));
+    }
+  }, [account]);
 
   const isAddr = (v: string) => {
-    try {
-      return !!v && ethers.isAddress(v);
-    } catch {
-      return false;
-    }
+    try { return !!v && ethers.isAddress(v); } catch { return false; }
   };
 
   const canSubmit = useMemo(() => {
@@ -155,70 +118,111 @@ export default function SelfCreate(): JSX.Element {
         isAddr(form.royaltyReceiver) &&
         isAddr(form.mintFeeReceiver)
       );
-    } catch {
-      return false;
-    }
+    } catch { return false; }
   }, [form]);
 
-  async function getEvmProvider(): Promise<ethers.BrowserProvider> {
-    // Prefer injected; otherwise use our singleton WalletConnect provider
-    const eth = getInjectedProvider();
-    if (eth) {
-      await ensureInjectedOnHedera(eth);
-      return new ethers.BrowserProvider(eth);
-    }
-    const wc = await getWcEvmProvider(); // singleton; no duplicate init
-    // If no addr yet, WC will open HashPack popup
-    const addr = getWcAddress(wc);
-    if (!addr) {
-      // Calling request accounts will force wallet UI
-      await wc.request({ method: "eth_requestAccounts", params: [] }).catch(() => {});
-    }
-    return new ethers.BrowserProvider(wc);
-  }
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string>('');
+  const [successAddr, setSuccessAddr] = useState<string>('');
+  const [copied, setCopied] = useState(false);
 
-  async function deployWithFactory() {
+  async function deploy() {
+    if (submitting) return;
+    setError('');
+    setSuccessAddr('');
+
+    // 1) Ensure wallet connected (opens WC pairing if needed)
+    if (!account) {
+      try { await connect(); } catch (e:any) { setError(e?.message || 'Connect failed'); return; }
+      if (!account) return; // user canceled
+    }
+
+    // 2) Ensure app auth (SentX-style challenge/sign/verify)
     try {
-      setSubmitting(true);
-      setError('');
-      setSuccessAddr('');
+      await login(); // no-op if token already valid
+    } catch (e: any) {
+      setError(e?.message || 'Authentication failed');
+      return;
+    }
 
-      const provider = await getEvmProvider();
-      const signer = await provider.getSigner();
+    setSubmitting(true);
+    try {
+      // 3) Get ethers signer bound to WC provider & ensure chain=295
+      const { signer, address } = await getEthers();
+      await signer.getAddress(); // triggers wallet permission if required
 
-      const supply = BigInt(form.supply);
-      const firstId = BigInt(form.firstTokenId);
-      const royaltyBps = BigInt(form.royaltyBps);
-
+      // 4) Execute factory call
       const factory = new ethers.Contract(FACTORY_ADDRESS, FACTORY_ABI, signer);
       const tx = await factory.createProjectPublic(
         form.name.trim(),
         form.symbol.trim(),
         form.baseUri.trim(),
-        supply,
-        firstId,
+        BigInt(form.supply),
+        BigInt(form.firstTokenId),
         form.signer,
         form.projectOwner,
-        royaltyBps,
+        BigInt(form.royaltyBps),
         form.royaltyReceiver,
         form.mintFeeReceiver
       );
 
-      const rcpt = await tx.wait();
+      const receipt = (await tx.wait()) as ethers.TransactionReceipt;
 
-      let newAddr: string | undefined;
-      for (const log of rcpt.logs) {
+      // 5) Resolve new collection address
+      let newAddr: string | null = null;
+      for (const log of receipt.logs) {
         try {
           const parsed = iface.parseLog({ data: log.data, topics: [...log.topics] });
           if (parsed?.name === 'ProjectCreated') {
-            newAddr = parsed.args?.contractAddress as string;
+            newAddr = ethers.getAddress(parsed.args.contractAddress as string);
             break;
           }
         } catch {}
       }
+      if (!newAddr) {
+        const sig = iface.getEvent('ProjectCreated')!.topicHash;
+        for (const log of receipt.logs) {
+          if (log.topics && log.topics[0] === sig && log.topics.length >= 3) {
+            const topic = log.topics[2];
+            if (topic && topic.length >= 42) {
+              const addr = ethers.getAddress('0x' + topic.slice(-40));
+              if (ethers.isAddress(addr)) { newAddr = addr; break; }
+            }
+          }
+        }
+      }
+      if (!newAddr) throw new Error("Deployed, but couldn’t resolve new contract address.");
 
-      if (!newAddr) throw new Error('Deployed, but could not resolve new contract address from logs.');
       setSuccessAddr(newAddr);
+
+      // 6) Persist to your API (authenticated by user JWT)
+      try {
+        const userToken = token || (await login());
+        await fetch(`${API_BASE}/api/projects`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({
+            name: form.name.trim(),
+            symbol: form.symbol.trim(),
+            baseUri: form.baseUri.trim(),
+            supply: Number(form.supply),
+            firstTokenId: Number(form.firstTokenId),
+            contractAddress: newAddr,
+            owner: form.projectOwner,
+            signer: form.signer,
+            royaltyReceiver: form.royaltyReceiver,
+            royaltyBps: Number(form.royaltyBps),
+            mintFeeReceiver: form.mintFeeReceiver,
+            description: form.description,
+            imageUrl: form.imageUrl,
+            featured: false,
+            createdBy: address,
+          }),
+        }).catch(() => {});
+      } catch {}
     } catch (e: any) {
       setError(e?.info?.error?.message || e?.shortMessage || e?.message || 'Deployment failed');
     } finally {
@@ -226,12 +230,22 @@ export default function SelfCreate(): JSX.Element {
     }
   }
 
-  const busy = hederaStatus === 'initializing' || hederaStatus === 'connecting';
+  const connectionBadge = account
+    ? <>HashPack EVM:&nbsp;<span className="font-mono">{account}</span></>
+    : status === 'connecting' ? 'Connecting…' : 'Not connected';
 
   return (
     <div className="bg-[#0d0d0d] w-full min-w-[320px] relative flex flex-col">
       <NavigationSection />
       <HeaderSpacer />
+
+      {!account && status !== 'connecting' && (
+        <div className="mx-auto w-full max-w-[1240px] px-6 pt-4">
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-amber-200 text-sm">
+            Please click <b>Log in</b> in the navbar to pair HashPack (or click Deploy to open pairing).
+          </div>
+        </div>
+      )}
 
       <div className="border-b border-white/10 bg-gradient-to-b from-white/[0.03] to-transparent">
         <div className="mx-auto w-full max-w-[1240px] px-6 pt-4 pb-8">
@@ -248,19 +262,12 @@ export default function SelfCreate(): JSX.Element {
               <h1 className="text-[28px] leading-none tracking-tight text-[#d5d7e3] font-semibold">
                 Self-Created Collection
               </h1>
-              <p className="mt-2 text-sm text-white/60">Deploy an ERC-721 collection on Hedera EVM.</p>
+              <p className="mt-2 text-sm text-white/60">
+                Deploy an ERC-721 collection on Hedera EVM with HashPack.
+              </p>
             </div>
             <span className="ml-auto inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70">
-              {hederaConnected ? (
-                <>
-                  <span className="opacity-80">Hedera:</span>
-                  <span className="font-mono">{hederaAccountId}</span>
-                </>
-              ) : busy ? (
-                'Connecting…'
-              ) : (
-                'Not connected'
-              )}
+              {connectionBadge}
             </span>
           </div>
         </div>
@@ -306,6 +313,7 @@ export default function SelfCreate(): JSX.Element {
           </div>
         ) : null}
 
+        {/* FORM */}
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 rounded-2xl border border-white/10 bg-white/[0.04] p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -351,6 +359,7 @@ export default function SelfCreate(): JSX.Element {
                 />
               </div>
               <div>
+                {/* FIXED typo: text.sm -> text-sm */}
                 <label className="block text-sm text-white/70 mb-2">First Token ID</label>
                 <input
                   type="number"
@@ -380,7 +389,7 @@ export default function SelfCreate(): JSX.Element {
                 onChange={(e) => setForm((p) => ({ ...p, baseUri: e.target.value }))}
               />
               <p className="mt-2 text-xs text-white/50">
-                Metadata base, e.g. <span className="font-mono">ipfs://CID/</span> so token 1 resolves to{" "}
+                Example: <span className="font-mono">ipfs://CID/</span> so token 1 resolves to{' '}
                 <span className="font-mono">ipfs://CID/1</span>
               </p>
             </div>
@@ -426,7 +435,7 @@ export default function SelfCreate(): JSX.Element {
               <Button
                 className="h-12 rounded-xl bg-[#d5d7e3] text-[#0d0d0d] hover:bg-[#c5c7d3] disabled:opacity-60"
                 disabled={!canSubmit || submitting}
-                onClick={deployWithFactory}
+                onClick={deploy}
               >
                 {submitting ? (
                   <span className="inline-flex items-center gap-2">
@@ -440,9 +449,9 @@ export default function SelfCreate(): JSX.Element {
                   </span>
                 )}
               </Button>
-              {!hederaConnected && (
+              {!account && (
                 <span className="text-sm text-white/60">
-                  Approval opens in HashPack (WalletConnect).
+                  Not paired? We’ll show a QR / URI for HashPack.
                 </span>
               )}
             </div>
@@ -476,20 +485,16 @@ export default function SelfCreate(): JSX.Element {
                   <div className="h-full w-full grid place-items-center text-white/40 text-sm">Image preview</div>
                 )}
               </div>
-              <p className="mt-3 text-xs text-white/50">
-                Use a square image (e.g. 512×512 or 1024×1024) for best results across cards & embeds.
-              </p>
+              <p className="mt-3 text-xs text-white/50">Use a square image (512–1024px) for best results.</p>
             </div>
 
             <div className="mt-6 h-px w-full bg-white/10" />
 
             <div className="mt-6 text-sm text-white/70 leading-6">
               <p>
-                Deploys via <span className="font-mono">HedraXFactory</span> on Hedera EVM Mainnet (chainId 295).
+                Deploys via <span className="font-mono">HedraXFactory</span> on Hedera EVM (chainId 295).
               </p>
-              <p className="mt-2">
-                No extension? We open a WalletConnect session so you can approve in HashPack.
-              </p>
+              <p className="mt-2">HashPack pairing persists; future txs show an approve modal (no QR).</p>
               <p className="mt-2 text-white/50">
                 Factory: <span className="font-mono">{FACTORY_ADDRESS}</span>
               </p>
@@ -497,6 +502,37 @@ export default function SelfCreate(): JSX.Element {
           </div>
         </div>
       </div>
+
+      {/* WC pairing modal */}
+      {wcOpen && displayUri && (
+        <div className="fixed inset-0 z-[1000] bg-black/60 backdrop-blur-sm grid place-items-center p-4">
+          <div className="w-full max-w-[560px] rounded-2xl border border-white/10 bg-[#111]/95 text-white p-5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Connect with HashPack (WalletConnect)</h3>
+              <button onClick={() => setWcOpen(false)} className="rounded-md px-2 py-1 hover:bg-white/10" aria-label="Close">✕</button>
+            </div>
+            <p className="mt-3 text-sm text-white/70">
+              Desktop: open HashPack → <b>Connected dApps → Connect dApp</b> and paste the URI. Mobile: scan the QR.
+            </p>
+            <div className="mt-3 flex items-center gap-2 bg-white/5 rounded-md px-2 py-2">
+              <code className="text-xs break-all flex-1">{displayUri}</code>
+              <button
+                className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs ${copied ? 'bg-emerald-600/30' : 'bg-white/10 hover:bg-white/15'}`}
+                onClick={async () => { await navigator.clipboard.writeText(displayUri); setCopied(true); setTimeout(()=>setCopied(false), 1200); }}
+              >
+                <Copy className="w-3 h-3" /> {copied ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+            <div className="mt-4 grid place-items-center">
+              <img
+                className="rounded-lg border border-white/10"
+                alt="WalletConnect QR"
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(displayUri)}`}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <FooterSection />
     </div>
